@@ -1,0 +1,12 @@
+version: '3'
+services:
+#  redis-server:
+#    image: 'redis'
+  go-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+#      - "6060:6060"
+    restart: always
