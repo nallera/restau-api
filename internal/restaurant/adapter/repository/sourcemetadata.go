@@ -1,11 +1,10 @@
 package repository
 
 import (
+	"fmt"
 	"restauAPI/server"
 	"time"
 )
-
-const RefreshTime = 6 * time.Hour
 
 type WebSourceMetadata interface {
 	IsTooOld() bool
@@ -14,21 +13,25 @@ type WebSourceMetadata interface {
 }
 
 type webSourceMetadata struct {
-	etag         string
-	lastModified time.Time
-	clock        server.Clock
+	etag          string
+	lastModified  time.Time
+	clock         server.Clock
+	refreshPeriod time.Duration
 }
 
-func NewWebSourceMetadata(clock server.Clock) WebSourceMetadata {
+func NewWebSourceMetadata(clock server.Clock, refreshPeriodSeconds int) WebSourceMetadata {
+	refreshPeriod := time.Duration(refreshPeriodSeconds) * time.Second
+	println(fmt.Sprintf("Web Source Metadata refresh period: %+v", refreshPeriod))
 	return &webSourceMetadata{
-		etag:         "",
-		lastModified: time.Date(0, 1, 1, 0, 0, 0, 0, time.UTC),
-		clock:        clock,
+		etag:          "",
+		lastModified:  time.Date(0, 1, 1, 0, 0, 0, 0, time.UTC),
+		clock:         clock,
+		refreshPeriod: refreshPeriod,
 	}
 }
 
 func (m *webSourceMetadata) IsTooOld() bool {
-	return m.clock.Time().Sub(m.lastModified) > RefreshTime
+	return m.clock.Time().Sub(m.lastModified) > m.refreshPeriod
 }
 
 func (m *webSourceMetadata) EtagEquals(etag string) bool {

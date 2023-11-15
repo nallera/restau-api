@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"restauAPI/config"
 	"restauAPI/internal/restaurant"
 
 	//"github.com/go-redis/redis/v8"
@@ -22,10 +23,12 @@ func main() {
 	//cacheClient := server.NewRedisClient(redisClient)
 	//restaurantRepo := repository.NewCacheClient(cacheClient)
 
+	cfg := config.GetConfig()
+
 	clock := server.NewClock()
 	restClient := server.NewRestClient()
-	webSourceMetadata := repository.NewWebSourceMetadata(clock)
-	restaurantCache := restaurant.NewRestaurantCache(clock)
+	webSourceMetadata := repository.NewWebSourceMetadata(clock, cfg.WebSourceMetadata.RefreshPeriodSeconds)
+	restaurantCache := restaurant.NewRestaurantCache(clock, cfg.RestaurantCache.CacheTTLSeconds)
 	restRepositoryClient := repository.NewRestRepositoryClient(restClient, webSourceMetadata)
 	restaurantService := restauapp.NewRestaurantService(restRepositoryClient, restaurantCache, clock)
 	restaurantHandler := restauport.NewHTTPHandler(restaurantService)

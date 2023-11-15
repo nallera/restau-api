@@ -36,20 +36,21 @@ func (rs *restaurantService) GetAvailableRestaurants(latitude, longitude float64
 		return nil, fmt.Errorf("error getting restaurants for location (%.5f, %.5f): %v", latitude, longitude, err)
 	}
 
+	// filter restaurants by the business needs
 	availableRestaurants := filterRestaurants(rs.restaurantCache.Get(), latitude, longitude, getCurrentTimeNoDate(rs.clock.Time()))
 
 	return availableRestaurants, nil
 }
 
 func (rs *restaurantService) updateCacheIfNeeded() error {
-	if rs.restaurantCache.DataIsOld() {
-		restaurants, repoErr := rs.restaurantRepository.GetRestaurants()
+	if rs.restaurantCache.DataIsOld() { // if the data in the cache is older than the accepted margin
+		restaurants, repoErr := rs.restaurantRepository.GetRestaurants() // fetch from web
 		if repoErr != nil {
 			return repoErr
 		}
-		if restaurants != nil {
+		if restaurants != nil { // if there's new data, update the cache and the last modified date
 			rs.restaurantCache.Update(restaurants)
-		} else {
+		} else { // if there's no new data, update the last modified to reset the TTL
 			rs.restaurantCache.UpdateLastModified()
 		}
 	}

@@ -1,0 +1,4 @@
+restaurant_cache:
+  cache_ttl_seconds: 300
+web_source_metadata:
+  refresh_period_seconds: 21600
