@@ -24,6 +24,7 @@ func NewRestRepositoryClient(restClient server.RestClient, webSourceMetadata Web
 
 func (r *RestRepositoryClient) GetRestaurants() ([]*restaurant.Restaurant, error) {
 	if r.webSourceMetadata.IsTooOld() { // if the web source metadata is too old according to the estimated update frequency
+		println("Checking for changes in the web source")
 		url := fmt.Sprintf("%s/takehome.csv", RestaurantsBaseURL)
 
 		headers, err := r.restClient.GetHead(url) // get the headers to check for changes before downloading the data
@@ -39,6 +40,7 @@ func (r *RestRepositoryClient) GetRestaurants() ([]*restaurant.Restaurant, error
 		// if the data changed, update the metadata
 		r.webSourceMetadata.Update(headers.Etag, headers.LastModified)
 
+		println("Web source changed, getting the new data")
 		csvLines, err := r.restClient.GetCSV(url)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get restaurants: %v", err)

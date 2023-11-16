@@ -40,14 +40,17 @@ func (rs *restaurantService) GetAvailableRestaurants(latitude, longitude float64
 
 func (rs *restaurantService) updateCacheIfNeeded() error {
 	if rs.restaurantCache.DataIsOld() { // if the data in the cache is older than the accepted margin
+		println("Checking if the restaurant cache needs to be updated")
 		restaurants, repoErr := rs.restaurantRepository.GetRestaurants() // fetch from web
 		if repoErr != nil {
 			return repoErr
 		}
 		if restaurants != nil { // if there's new data, update the cache and the last modified date
 			rs.restaurantCache.Update(restaurants)
+			println(fmt.Sprintf("Updated restaurant cache (%d entries)", len(restaurants)))
 		} else { // if there's no new data, update the last modified to reset the TTL
 			rs.restaurantCache.UpdateLastModified()
+			println("The web source hasn't changed, no updates to restaurant cache")
 		}
 	}
 	return nil
