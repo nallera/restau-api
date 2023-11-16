@@ -41,3 +41,21 @@ func MakeRestaurantsResponse() []*restaurant.Restaurant {
 		},
 	}
 }
+
+func MakeRestaurantsForBenchmark(n int) []*restaurant.Restaurant {
+	restaurants := make([]*restaurant.Restaurant, n)
+	restaurant := restaurant.Restaurant{
+		ID:                 1,
+		Latitude:           50,
+		Longitude:          60,
+		AvailabilityRadius: 4,
+		OpenHour:           time.Date(0, 1, 1, 16, 0, 0, 0, time.UTC),
+		CloseHour:          time.Date(0, 1, 1, 23, 0, 0, 0, time.UTC),
+	}
+
+	for i := 0; i < n; i++ {
+		restaurants[i] = &restaurant
+	}
+
+	return restaurants
+}

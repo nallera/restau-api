@@ -8,10 +8,6 @@ import (
 	"time"
 )
 
-const (
-	minimumDeliveryTime = time.Hour
-)
-
 type RestaurantService interface {
 	GetAvailableRestaurants(latitude, longitude float64) ([]uint64, error)
 }
@@ -37,7 +33,7 @@ func (rs *restaurantService) GetAvailableRestaurants(latitude, longitude float64
 	}
 
 	// filter restaurants by the business needs
-	availableRestaurants := filterRestaurants(rs.restaurantCache.Get(), latitude, longitude, getCurrentTimeNoDate(rs.clock.Time()))
+	availableRestaurants := FilterRestaurants(rs.restaurantCache.Get(), latitude, longitude, getCurrentTimeNoDate(rs.clock.Time()))
 
 	return availableRestaurants, nil
 }
@@ -57,7 +53,7 @@ func (rs *restaurantService) updateCacheIfNeeded() error {
 	return nil
 }
 
-func filterRestaurants(restaurants []*restaurant.Restaurant, latitude, longitude float64, currentTime time.Time) []uint64 {
+func FilterRestaurants(restaurants []*restaurant.Restaurant, latitude, longitude float64, currentTime time.Time) []uint64 {
 	var aux []*restaurant.Restaurant
 	var availableRestaurants []uint64
 
@@ -83,7 +79,7 @@ func getCurrentTimeNoDate(currentTime time.Time) time.Time {
 }
 
 func EnoughTimeToDeliver(currentTime, openHour, closeHour *time.Time) bool {
-	return currentTime.After(*openHour) && currentTime.Before(closeHour.Add(-minimumDeliveryTime))
+	return currentTime.After(*openHour) && currentTime.Before(*closeHour)
 }
 
 func WithinDeliveryRange(latitude, longitude, rLatitude, rLongitude, radius float64) bool {
